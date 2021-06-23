@@ -1,12 +1,7 @@
 # See the OWNERS docs at https://go.k8s.io/owners
 
 approvers:
-- Random-Liu
-- derekwaynecarr
-- tallclair
-- yujuhong
-- sjenning
-- mrunalp
+- sig-node-approvers
 emeritus_approvers:
 - vishh
 - dchen1107

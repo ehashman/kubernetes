@@ -2,13 +2,7 @@
 
 # same list as in https://github.com/kubernetes/kubernetes/blob/master/OWNERS_ALIASES#LC220:~:text=sig%2Dnode%2Dapprovers
 approvers:
-- Random-Liu
-- dchen1107
-- derekwaynecarr
-- yujuhong
-- sjenning
-- mrunalp
-- klueska
+- sig-node-approvers
 
 emeritus_approvers:
 - dashpole
