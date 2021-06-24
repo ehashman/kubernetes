@@ -1191,7 +1191,9 @@ func TestDropProbeGracePeriod(t *testing.T) {
 	for _, enabled := range []bool{true, false} {
 		for _, oldPodInfo := range podInfo {
 			for _, newPodInfo := range podInfo {
-				oldPod := oldPodInfo.pod()
+
+				oldPodHasGracePeriod, oldPod := newPodInfo.hasGracePeriod, oldPodInfo.pod()
+
 				newPodHasGracePeriod, newPod := newPodInfo.hasGracePeriod, newPodInfo.pod()
 
 				if newPod == nil {
@@ -1214,7 +1216,9 @@ func TestDropProbeGracePeriod(t *testing.T) {
 					}
 
 					switch {
-					case enabled:
+
+					case enabled || !oldPodHasGracePeriod:
+
 						// new pod should not be changed if the feature is enabled
 						if !reflect.DeepEqual(newPod, newPodInfo.pod()) {
 							t.Errorf("new pod changed: %v", cmp.Diff(newPod, newPodInfo.pod()))
