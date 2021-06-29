@@ -1187,21 +1187,16 @@ func TestDropProbeGracePeriod(t *testing.T) {
 		},
 	}
 
-	//enabled := true
 	for _, enabled := range []bool{true, false} {
 		for _, oldPodInfo := range podInfo {
 			for _, newPodInfo := range podInfo {
-
-				oldPodHasGracePeriod, oldPod := newPodInfo.hasGracePeriod, oldPodInfo.pod()
-
+				oldPodHasGracePeriod, oldPod := oldPodInfo.hasGracePeriod, oldPodInfo.pod()
 				newPodHasGracePeriod, newPod := newPodInfo.hasGracePeriod, newPodInfo.pod()
-
 				if newPod == nil {
 					continue
 				}
 
 				t.Run(fmt.Sprintf("feature enabled=%v, old pod %v, new pod %v", enabled, oldPodInfo.description, newPodInfo.description), func(t *testing.T) {
-
 					defer featuregatetesting.SetFeatureGateDuringTest(t, utilfeature.DefaultFeatureGate, features.ProbeTerminationGracePeriod, enabled)()
 
 					var oldPodSpec *api.PodSpec
@@ -1216,22 +1211,20 @@ func TestDropProbeGracePeriod(t *testing.T) {
 					}
 
 					switch {
-
-					case enabled || !oldPodHasGracePeriod:
-
-						// new pod should not be changed if the feature is enabled
+					case enabled || oldPodHasGracePeriod:
+						// new pod should not be changed if the feature is enabled, or if the old pod had subpaths
 						if !reflect.DeepEqual(newPod, newPodInfo.pod()) {
 							t.Errorf("new pod changed: %v", cmp.Diff(newPod, newPodInfo.pod()))
 						}
-
 					case newPodHasGracePeriod:
-						// new pod should not have grace period if the feature gate is disabled
-						t.Errorf("new pod should not have grace period if the feature is disabled")
-
-					case reflect.DeepEqual(newPod, newPodInfo.pod()):
-						// new pod should be changed if the feature gate is disabled
-						t.Errorf("new pod was not changed")
-
+						// new pod should be changed
+						if reflect.DeepEqual(newPod, newPodInfo.pod()) {
+							t.Errorf("new pod was not changed")
+						}
+						// new pod should not have subpaths
+						if !reflect.DeepEqual(newPod, podWithoutProbeGracePeriod()) {
+							t.Errorf("new pod had probe-level terminationGracePeriod: %v", cmp.Diff(newPod, podWithoutProbeGracePeriod()))
+						}
 					default:
 						// new pod should not need to be changed
 						if !reflect.DeepEqual(newPod, newPodInfo.pod()) {
